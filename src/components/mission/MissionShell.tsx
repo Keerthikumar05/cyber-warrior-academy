@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
+// (motion removed from this file; CSS animations used instead)
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight, CheckCircle2, Star, Trophy, X } from "lucide-react";
 import type { Mission, MissionStep } from "@/lib/missions/types";
@@ -166,20 +166,12 @@ export function MissionShell({ mission }: Props) {
 
       <div className="mx-auto max-w-7xl px-4 py-6 grid lg:grid-cols-[1fr_360px] gap-6">
         <div className="min-h-[60vh]">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -16 }}
-              transition={{ duration: 0.25 }}
-            >
-              <div className="flex items-center gap-2 mb-4">
-                <StepBadge kind={step.kind} index={index} total={mission.steps.length} />
-              </div>
-              {stepEl}
-            </motion.div>
-          </AnimatePresence>
+          <div key={index} className="animate-fade-in">
+            <div className="flex items-center gap-2 mb-4">
+              <StepBadge kind={step.kind} index={index} total={mission.steps.length} />
+            </div>
+            {stepEl}
+          </div>
 
           {step.kind !== "mastery" && (
             <div className="mt-8 flex items-center justify-between">

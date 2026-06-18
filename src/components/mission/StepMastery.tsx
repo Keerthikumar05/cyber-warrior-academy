@@ -1,4 +1,3 @@
-import { motion } from "motion/react";
 import type { MasteryStep } from "@/lib/missions/types";
 import { Trophy, Star, Sparkles } from "lucide-react";
 
@@ -12,19 +11,10 @@ export function StepMastery({
   alreadyDone: boolean;
 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="panel p-8 text-center scanline overflow-hidden"
-    >
-      <motion.div
-        initial={{ rotate: -10, scale: 0.6 }}
-        animate={{ rotate: 0, scale: 1 }}
-        transition={{ type: "spring", stiffness: 220, damping: 14 }}
-        className="mx-auto size-24 rounded-full grid place-items-center bg-gradient-to-br from-accent to-secondary glow-ring-gold"
-      >
+    <div className="panel p-8 text-center scanline overflow-hidden animate-fade-in">
+      <div className="mx-auto size-24 rounded-full grid place-items-center bg-gradient-to-br from-accent to-secondary glow-ring-gold animate-float-y">
         <Trophy className="size-12 text-accent-foreground" />
-      </motion.div>
+      </div>
       <h2 className="font-display text-3xl mt-5 neon-gold">{step.title}</h2>
       <p className="mt-2 text-foreground/85 max-w-xl mx-auto">{step.summary}</p>
 
@@ -51,6 +41,6 @@ export function StepMastery({
       <button onClick={onFinish} className="btn-hero mt-6">
         {alreadyDone ? "Continue" : "Claim rewards"}
       </button>
-    </motion.div>
+    </div>
   );
 }
