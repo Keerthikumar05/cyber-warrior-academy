@@ -163,7 +163,7 @@ function AuthPage() {
             {mode === "signup" ? "Sign in" : "Create one"}
           </button>
         </p>
-      </motion.div>
+      </div>
     </div>
   );
 }

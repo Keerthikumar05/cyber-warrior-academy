@@ -68,7 +68,7 @@ function ProfilePage() {
     <div className="min-h-screen">
       <PlayerHUD />
       <div className="mx-auto max-w-5xl px-4 py-8 space-y-6">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="panel p-6 grid sm:grid-cols-[auto_1fr_auto] gap-6 items-center">
+        <div className="panel p-6 grid sm:grid-cols-[auto_1fr_auto] gap-6 items-center animate-fade-in">
           <div className="size-20 rounded-full grid place-items-center bg-gradient-to-br from-primary to-secondary glow-ring-cyan font-display text-3xl">
             {(profile?.username ?? "W")[0].toUpperCase()}
           </div>
@@ -88,7 +88,7 @@ function ProfilePage() {
             <Stat Icon={Coins} label="Coins" value={profile?.coins ?? 0} accent="gold" />
             <Stat Icon={Trophy} label="Badges" value={badges.length} accent="purple" />
           </div>
-        </motion.div>
+        </div>
 
         <div className="grid md:grid-cols-2 gap-6">
           <div className="panel p-5">
