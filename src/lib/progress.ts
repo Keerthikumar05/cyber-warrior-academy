@@ -120,7 +120,7 @@ export async function syncGuestToCloud() {
     await supabase.from("user_progress").upsert(entries, { onConflict: "user_id,world_slug,mission_slug" });
   }
   if (guest.xp > 0) {
-    await supabase.rpc("award_xp", { _amount: guest.xp, _source: "guest_sync", _mission: null });
+    await supabase.rpc("award_xp", { _amount: guest.xp, _source: "guest_sync" });
   }
   for (const b of guest.badges) {
     await supabase.from("user_badges").insert({ user_id: userData.user.id, badge_slug: b });
