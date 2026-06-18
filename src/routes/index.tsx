@@ -170,7 +170,7 @@ function WorldMap() {
                 ) : (
                   <div className="mt-4 text-xs uppercase tracking-widest text-muted-foreground">Coming next</div>
                 )}
-              </motion.div>
+              </div>
             );
           })}
         </div>
