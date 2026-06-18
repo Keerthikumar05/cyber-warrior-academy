@@ -79,11 +79,7 @@ function AuthPage() {
 
   return (
     <div className="min-h-screen grid place-items-center px-4 grid-bg">
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="panel p-7 w-full max-w-md"
-      >
+      <div className="panel p-7 w-full max-w-md animate-fade-in">
         <Link to="/" className="text-xs text-muted-foreground inline-flex items-center gap-1 hover:text-primary mb-4">
           <ArrowLeft className="size-3" /> Back to map
         </Link>
