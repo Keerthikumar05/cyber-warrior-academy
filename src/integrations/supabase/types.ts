@@ -14,13 +14,205 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      code_submissions: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          language: string
+          mission_slug: string
+          output: string | null
+          passed: boolean
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          language: string
+          mission_slug: string
+          output?: string | null
+          passed?: boolean
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          language?: string
+          mission_slug?: string
+          output?: string | null
+          passed?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
+      mentor_messages: {
+        Row: {
+          content: string
+          context: Json | null
+          created_at: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          context?: Json | null
+          created_at?: string
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          context?: Json | null
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          coins: number
+          created_at: string
+          current_streak: number
+          id: string
+          last_active_date: string | null
+          level: number
+          updated_at: string
+          username: string | null
+          xp: number
+        }
+        Insert: {
+          avatar_url?: string | null
+          coins?: number
+          created_at?: string
+          current_streak?: number
+          id: string
+          last_active_date?: string | null
+          level?: number
+          updated_at?: string
+          username?: string | null
+          xp?: number
+        }
+        Update: {
+          avatar_url?: string | null
+          coins?: number
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_active_date?: string | null
+          level?: number
+          updated_at?: string
+          username?: string | null
+          xp?: number
+        }
+        Relationships: []
+      }
+      user_badges: {
+        Row: {
+          badge_slug: string
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          badge_slug: string
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          badge_slug?: string
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_progress: {
+        Row: {
+          attempts: number
+          best_score: number
+          completed: boolean
+          completed_at: string | null
+          id: string
+          mission_slug: string
+          step_index: number
+          updated_at: string
+          user_id: string
+          world_slug: string
+        }
+        Insert: {
+          attempts?: number
+          best_score?: number
+          completed?: boolean
+          completed_at?: string | null
+          id?: string
+          mission_slug: string
+          step_index?: number
+          updated_at?: string
+          user_id: string
+          world_slug: string
+        }
+        Update: {
+          attempts?: number
+          best_score?: number
+          completed?: boolean
+          completed_at?: string | null
+          id?: string
+          mission_slug?: string
+          step_index?: number
+          updated_at?: string
+          user_id?: string
+          world_slug?: string
+        }
+        Relationships: []
+      }
+      user_xp_events: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          mission_slug: string | null
+          source: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          mission_slug?: string | null
+          source: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          mission_slug?: string | null
+          source?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      award_xp: {
+        Args: { _amount: number; _mission?: string; _source: string }
+        Returns: {
+          leveled_up: boolean
+          new_level: number
+          new_xp: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
