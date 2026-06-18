@@ -17,11 +17,6 @@ export const Route = createFileRoute("/play/$world/$mission")({
       ],
     };
   },
-  loader: ({ params }) => {
-    const mission = getMission(params.world, params.mission);
-    if (!mission) throw notFound();
-    return { mission };
-  },
   notFoundComponent: () => (
     <div className="min-h-screen grid place-items-center px-4">
       <div className="panel p-8 text-center">
@@ -44,6 +39,8 @@ export const Route = createFileRoute("/play/$world/$mission")({
 });
 
 function PlayMission() {
-  const { mission } = Route.useLoaderData();
+  const params = Route.useParams();
+  const mission = getMission(params.world, params.mission);
+  if (!mission) throw notFound();
   return <MissionShell mission={mission} />;
 }
