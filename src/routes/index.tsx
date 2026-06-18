@@ -63,39 +63,33 @@ function WorldMap() {
         <div className="absolute inset-0 grid-bg opacity-50" />
         <div className="absolute inset-0" style={{ background: "var(--gradient-hero)" }} />
         <div className="relative mx-auto max-w-7xl px-4 py-20 sm:py-28 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-          >
-            <span className="chip glow-ring-purple/40 neon-purple"><Sparkles className="size-3" /> The universe is under attack</span>
-            <h1 className="mt-5 font-display text-4xl sm:text-6xl tracking-wide">
-              <span className="neon-cyan">BECOME A</span>{" "}
-              <span className="neon-purple">CODE WARRIOR</span>
-            </h1>
-            <p className="mt-5 max-w-2xl mx-auto text-foreground/80">
-              Bugs have corrupted the system. Choose a world, solve missions, and learn real programming —
-              guided by Cipher, your personal AI mentor.
-            </p>
-            <div className="mt-8 flex items-center justify-center gap-3 flex-wrap">
-              <Link
-                to="/play/$world/$mission"
-                params={{ world: "logic-land", mission: "awakening-sequence" }}
-                className="btn-hero"
-              >
-                Begin Mission 1 <ArrowRight className="size-4" />
+          <span className="chip glow-ring-purple/40 neon-purple"><Sparkles className="size-3" /> The universe is under attack</span>
+          <h1 className="mt-5 font-display text-4xl sm:text-6xl tracking-wide">
+            <span className="neon-cyan">BECOME A</span>{" "}
+            <span className="neon-purple">CODE WARRIOR</span>
+          </h1>
+          <p className="mt-5 max-w-2xl mx-auto text-foreground/80">
+            Bugs have corrupted the system. Choose a world, solve missions, and learn real programming —
+            guided by Cipher, your personal AI mentor.
+          </p>
+          <div className="mt-8 flex items-center justify-center gap-3 flex-wrap">
+            <Link
+              to="/play/$world/$mission"
+              params={{ world: "logic-land", mission: "awakening-sequence" }}
+              className="btn-hero"
+            >
+              Begin Mission 1 <ArrowRight className="size-4" />
+            </Link>
+            {!authed && (
+              <Link to="/auth" className="btn-ghost-neon">
+                Sign in to save progress
               </Link>
-              {!authed && (
-                <Link to="/auth" className="btn-ghost-neon">
-                  Sign in to save progress
-                </Link>
-              )}
-            </div>
-            <div className="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">
-              <CheckCircle2 className="size-3.5 text-primary" />
-              No account needed for the first mission
-            </div>
-          </motion.div>
+            )}
+          </div>
+          <div className="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+            <CheckCircle2 className="size-3.5 text-primary" />
+            No account needed for the first mission
+          </div>
         </div>
       </section>
 
