@@ -110,17 +110,14 @@ function WorldMap() {
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {worlds.map((w, idx) => {
+          {worlds.map((w) => {
             const missions = getMissionsForWorld(w.slug);
             const cleared = missions.filter((m) => completedSet.has(`${w.slug}/${m.slug}`)).length;
             const total = missions.length;
             const isAvailable = w.status === "available";
             return (
-              <motion.div
+              <div
                 key={w.slug}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.05 }}
                 className={`relative overflow-hidden rounded-xl border bg-gradient-to-br ${accentClass[w.accent]} p-5 transition ${
                   !isAvailable ? "opacity-60" : "hover-scale"
                 }`}
