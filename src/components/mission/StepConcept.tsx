@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
-import type { ConceptStep } from "@/lib/missions/types";
-import { Check, X } from "lucide-react";
+import type { ConceptStep, DSOp } from "@/lib/missions/types";
+import { Check, X, ArrowRight } from "lucide-react";
 
 export function StepConcept({ step }: { step: ConceptStep }) {
   return (
@@ -23,6 +23,8 @@ function Demo({ demo }: { demo: ConceptStep["demo"] }) {
   if (demo.type === "loop-counter") return <LoopCounter from={demo.from} to={demo.to} />;
   if (demo.type === "code-trace") return <CodeTrace lines={demo.lines} explain={demo.explain} />;
   if (demo.type === "var-box") return <VarBox values={demo.values} />;
+  if (demo.type === "ds-viz") return <DSViz structure={demo.structure} ops={demo.ops} />;
+  if (demo.type === "bug-diff") return <BugDiff before={demo.before} after={demo.after} explain={demo.explain} />;
   return null;
 }
 
