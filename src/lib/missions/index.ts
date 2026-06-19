@@ -1,6 +1,8 @@
 import type { Mission, World } from "./types";
 import { logicLandMissions } from "./logic-land";
 import { pythonKingdomMissions } from "./python-kingdom";
+import { bugHunterCityMissions } from "./bug-hunter-city";
+import { dataStructureArenaMissions } from "./data-structure-arena";
 
 export const worlds: World[] = [
   {
@@ -29,21 +31,21 @@ export const worlds: World[] = [
     slug: "bug-hunter-city",
     name: "Bug Hunter City",
     tagline: "Hunt broken code through neon alleys.",
-    description: "Debugging, testing, error handling, code quality. Unlocked next.",
-    status: "soon",
+    description: "Debugging, off-by-ones, reference traps, exceptions, performance — the real-world skill nobody teaches.",
+    status: "available",
     accent: "green",
     order: 3,
-    missions: [],
+    missions: bugHunterCityMissions.map((m) => m.slug),
   },
   {
     slug: "data-structure-arena",
     name: "Data Structure Arena",
-    tagline: "Arrays, lists, trees, graphs — fight as a team.",
-    description: "Visualize and command core data structures in live combat.",
-    status: "soon",
+    tagline: "Arrays, stacks, queues, trees — fight as a team.",
+    description: "Visualize and command the core data structures every algorithm is built from.",
+    status: "available",
     accent: "cyan",
     order: 4,
-    missions: [],
+    missions: dataStructureArenaMissions.map((m) => m.slug),
   },
   {
     slug: "algorithm-warzone",
@@ -87,7 +89,12 @@ export const worlds: World[] = [
   },
 ];
 
-export const allMissions: Mission[] = [...logicLandMissions, ...pythonKingdomMissions];
+export const allMissions: Mission[] = [
+  ...logicLandMissions,
+  ...pythonKingdomMissions,
+  ...bugHunterCityMissions,
+  ...dataStructureArenaMissions,
+];
 
 export function getWorld(slug: string): World | undefined {
   return worlds.find((w) => w.slug === slug);

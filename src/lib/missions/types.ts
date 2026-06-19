@@ -25,7 +25,20 @@ export interface ConceptStep {
     | { type: "truth-table"; rows: Array<{ a: boolean; b?: boolean; out: boolean; label: string }> }
     | { type: "loop-counter"; from: number; to: number }
     | { type: "code-trace"; lines: string[]; explain: string[] }
-    | { type: "var-box"; values: Array<{ name: string; value: string; type: string }> };
+    | { type: "var-box"; values: Array<{ name: string; value: string; type: string }> }
+    | { type: "ds-viz"; structure: "array" | "stack" | "queue" | "linked-list" | "tree"; ops: DSOp[] }
+    | { type: "bug-diff"; before: string; after: string; explain: string };
+}
+
+/** One animation frame for a data-structure visualization. */
+export interface DSOp {
+  label: string;
+  /** For array/stack/queue/linked-list: ordered list of cell values. */
+  cells?: (number | string)[];
+  /** For tree: flat list of nodes; children referenced by index. */
+  tree?: Array<{ value: number | string; left?: number; right?: number }>;
+  /** Indexes (or tree node indexes) to highlight in this frame. */
+  highlight?: number[];
 }
 
 export type PracticeKind =
