@@ -10,9 +10,15 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as QuestsRouteImport } from './routes/quests'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as LeaderboardRouteImport } from './routes/leaderboard'
+import { Route as GuildsRouteImport } from './routes/guilds'
+import { Route as ForumRouteImport } from './routes/forum'
+import { Route as BattleRouteImport } from './routes/battle'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ForumThreadIdRouteImport } from './routes/forum.$threadId'
 import { Route as PlayWorldMissionRouteImport } from './routes/play.$world.$mission'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -20,9 +26,34 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const QuestsRoute = QuestsRouteImport.update({
+  id: '/quests',
+  path: '/quests',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LeaderboardRoute = LeaderboardRouteImport.update({
+  id: '/leaderboard',
+  path: '/leaderboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuildsRoute = GuildsRouteImport.update({
+  id: '/guilds',
+  path: '/guilds',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForumRoute = ForumRouteImport.update({
+  id: '/forum',
+  path: '/forum',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BattleRoute = BattleRouteImport.update({
+  id: '/battle',
+  path: '/battle',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -35,6 +66,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ForumThreadIdRoute = ForumThreadIdRouteImport.update({
+  id: '/$threadId',
+  path: '/$threadId',
+  getParentRoute: () => ForumRoute,
+} as any)
 const PlayWorldMissionRoute = PlayWorldMissionRouteImport.update({
   id: '/play/$world/$mission',
   path: '/play/$world/$mission',
@@ -44,23 +80,41 @@ const PlayWorldMissionRoute = PlayWorldMissionRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/battle': typeof BattleRoute
+  '/forum': typeof ForumRouteWithChildren
+  '/guilds': typeof GuildsRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/profile': typeof ProfileRoute
+  '/quests': typeof QuestsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/forum/$threadId': typeof ForumThreadIdRoute
   '/play/$world/$mission': typeof PlayWorldMissionRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/battle': typeof BattleRoute
+  '/forum': typeof ForumRouteWithChildren
+  '/guilds': typeof GuildsRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/profile': typeof ProfileRoute
+  '/quests': typeof QuestsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/forum/$threadId': typeof ForumThreadIdRoute
   '/play/$world/$mission': typeof PlayWorldMissionRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/battle': typeof BattleRoute
+  '/forum': typeof ForumRouteWithChildren
+  '/guilds': typeof GuildsRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/profile': typeof ProfileRoute
+  '/quests': typeof QuestsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/forum/$threadId': typeof ForumThreadIdRoute
   '/play/$world/$mission': typeof PlayWorldMissionRoute
 }
 export interface FileRouteTypes {
@@ -68,24 +122,52 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/battle'
+    | '/forum'
+    | '/guilds'
+    | '/leaderboard'
     | '/profile'
+    | '/quests'
     | '/sitemap.xml'
+    | '/forum/$threadId'
     | '/play/$world/$mission'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/profile' | '/sitemap.xml' | '/play/$world/$mission'
+  to:
+    | '/'
+    | '/auth'
+    | '/battle'
+    | '/forum'
+    | '/guilds'
+    | '/leaderboard'
+    | '/profile'
+    | '/quests'
+    | '/sitemap.xml'
+    | '/forum/$threadId'
+    | '/play/$world/$mission'
   id:
     | '__root__'
     | '/'
     | '/auth'
+    | '/battle'
+    | '/forum'
+    | '/guilds'
+    | '/leaderboard'
     | '/profile'
+    | '/quests'
     | '/sitemap.xml'
+    | '/forum/$threadId'
     | '/play/$world/$mission'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  BattleRoute: typeof BattleRoute
+  ForumRoute: typeof ForumRouteWithChildren
+  GuildsRoute: typeof GuildsRoute
+  LeaderboardRoute: typeof LeaderboardRoute
   ProfileRoute: typeof ProfileRoute
+  QuestsRoute: typeof QuestsRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   PlayWorldMissionRoute: typeof PlayWorldMissionRoute
 }
@@ -99,11 +181,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/quests': {
+      id: '/quests'
+      path: '/quests'
+      fullPath: '/quests'
+      preLoaderRoute: typeof QuestsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile': {
       id: '/profile'
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/leaderboard': {
+      id: '/leaderboard'
+      path: '/leaderboard'
+      fullPath: '/leaderboard'
+      preLoaderRoute: typeof LeaderboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guilds': {
+      id: '/guilds'
+      path: '/guilds'
+      fullPath: '/guilds'
+      preLoaderRoute: typeof GuildsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forum': {
+      id: '/forum'
+      path: '/forum'
+      fullPath: '/forum'
+      preLoaderRoute: typeof ForumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/battle': {
+      id: '/battle'
+      path: '/battle'
+      fullPath: '/battle'
+      preLoaderRoute: typeof BattleRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -120,6 +237,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forum/$threadId': {
+      id: '/forum/$threadId'
+      path: '/$threadId'
+      fullPath: '/forum/$threadId'
+      preLoaderRoute: typeof ForumThreadIdRouteImport
+      parentRoute: typeof ForumRoute
+    }
     '/play/$world/$mission': {
       id: '/play/$world/$mission'
       path: '/play/$world/$mission'
@@ -130,23 +254,28 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface ForumRouteChildren {
+  ForumThreadIdRoute: typeof ForumThreadIdRoute
+}
+
+const ForumRouteChildren: ForumRouteChildren = {
+  ForumThreadIdRoute: ForumThreadIdRoute,
+}
+
+const ForumRouteWithChildren = ForumRoute._addFileChildren(ForumRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  BattleRoute: BattleRoute,
+  ForumRoute: ForumRouteWithChildren,
+  GuildsRoute: GuildsRoute,
+  LeaderboardRoute: LeaderboardRoute,
   ProfileRoute: ProfileRoute,
+  QuestsRoute: QuestsRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   PlayWorldMissionRoute: PlayWorldMissionRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

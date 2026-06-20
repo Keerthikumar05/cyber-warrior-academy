@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useRouter } from "@tanstack/react-router";
-import { Zap, Coins, Star, LogOut, Sparkles, User as UserIcon } from "lucide-react";
+import { Zap, Coins, Star, LogOut, Sparkles, User as UserIcon, Trophy, Swords, Target, MessageSquare, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { readGuest, levelFromXp, type GuestProgress } from "@/lib/progress";
 
@@ -88,7 +88,26 @@ export function PlayerHUD() {
           </span>
         </Link>
 
+        <nav className="hidden md:flex items-center gap-1 text-xs">
+          <Link to="/quests" className="px-2 py-1 rounded hover:bg-surface-2 text-muted-foreground hover:text-primary flex items-center gap-1" title="Daily Quests">
+            <Target className="size-3.5" /> QUESTS
+          </Link>
+          <Link to="/battle" className="px-2 py-1 rounded hover:bg-surface-2 text-muted-foreground hover:text-secondary flex items-center gap-1" title="1v1 Battle">
+            <Swords className="size-3.5" /> BATTLE
+          </Link>
+          <Link to="/leaderboard" className="px-2 py-1 rounded hover:bg-surface-2 text-muted-foreground hover:text-accent flex items-center gap-1" title="Leaderboard">
+            <Trophy className="size-3.5" /> RANKS
+          </Link>
+          <Link to="/guilds" className="px-2 py-1 rounded hover:bg-surface-2 text-muted-foreground hover:text-secondary flex items-center gap-1" title="Guilds">
+            <Users className="size-3.5" /> GUILDS
+          </Link>
+          <Link to="/forum" className="px-2 py-1 rounded hover:bg-surface-2 text-muted-foreground hover:text-primary flex items-center gap-1" title="Forum">
+            <MessageSquare className="size-3.5" /> FORUM
+          </Link>
+        </nav>
+
         <div className="flex-1" />
+
 
         <div className="hidden sm:flex items-center gap-3">
           <div className="chip glow-ring-cyan/30" title={`Level ${level}`}>
