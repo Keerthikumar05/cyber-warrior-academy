@@ -57,6 +57,24 @@ export function isMissionCompletedLocal(worldSlug: string, missionSlug: string) 
 }
 
 // Cloud sync
+export interface QuestEvent {
+  slug: string;
+  title: string;
+  quest_type: string;
+  progress: number;
+  target: number;
+  newly_completed: boolean;
+  xp_reward: number;
+  coin_reward: number;
+}
+
+export interface MissionCompletionResult {
+  firstTime: boolean;
+  xpAwarded: number;
+  quests: QuestEvent[];
+  profile: { xp: number; level: number; coins: number } | null;
+}
+
 export async function awardCloud(opts: {
   xp: number;
   worldSlug: string;
@@ -64,46 +82,41 @@ export async function awardCloud(opts: {
   badgeSlug?: string;
   badgeName?: string;
   score?: number;
-}) {
+}): Promise<MissionCompletionResult | null> {
   const { data: userData } = await supabase.auth.getUser();
   const uid = userData.user?.id;
   if (!uid) return null;
 
-  await supabase.rpc("award_xp", {
-    _amount: opts.xp,
-    _source: "mission_complete",
-    _mission: `${opts.worldSlug}/${opts.missionSlug}`,
+  const { data, error } = await supabase.rpc("complete_mission", {
+    _world: opts.worldSlug,
+    _mission: opts.missionSlug,
+    _xp: opts.xp,
+    _badge: opts.badgeSlug ?? undefined,
+    _badge_name: opts.badgeName ?? undefined,
+    _score: opts.score ?? 100,
   });
+  if (error) throw error;
 
-  await supabase
-    .from("user_progress")
-    .upsert(
-      {
-        user_id: uid,
-        world_slug: opts.worldSlug,
-        mission_slug: opts.missionSlug,
-        completed: true,
-        completed_at: new Date().toISOString(),
-        best_score: opts.score ?? 100,
-        step_index: 999,
-      },
-      { onConflict: "user_id,world_slug,mission_slug" },
-    );
-
-  if (opts.badgeSlug) {
-    await supabase
-      .from("user_badges")
-      .insert({ user_id: uid, badge_slug: opts.badgeSlug })
-      .then((r) => r); // ignore unique-violation if already earned
-  }
+  const result = (data ?? {}) as {
+    first_time?: boolean;
+    xp_awarded?: number;
+    quests?: QuestEvent[];
+  };
 
   const { data: profile } = await supabase
     .from("profiles")
     .select("xp,level,coins")
     .eq("id", uid)
     .maybeSingle();
-  return profile;
+
+  return {
+    firstTime: !!result.first_time,
+    xpAwarded: result.xp_awarded ?? 0,
+    quests: result.quests ?? [],
+    profile: profile ?? null,
+  };
 }
+
 
 /** Migrate guest progress into a freshly signed-in account, then clear it locally. */
 export async function syncGuestToCloud() {

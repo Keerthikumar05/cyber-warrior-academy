@@ -64,19 +64,41 @@ function QuestsPage() {
     load();
   }, [load]);
 
+  // Realtime: live update quest progress when mission completion bumps it.
+  useEffect(() => {
+    if (!uid) return;
+    const channel = supabase
+      .channel(`quests:${uid}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "user_quest_progress", filter: `user_id=eq.${uid}` },
+        (payload) => {
+          const row = payload.new as Progress;
+          if (!row) return;
+          setProgress((prev) => ({ ...prev, [row.quest_id]: row }));
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [uid]);
+
   async function claim(q: Quest) {
     if (!uid) return;
     const p = progress[q.id];
     if (!p?.completed || p.claimed) return;
-    const today = new Date().toISOString().slice(0, 10);
-    await supabase
-      .from("user_quest_progress")
-      .update({ claimed: true })
-      .eq("user_id", uid)
-      .eq("quest_id", q.id)
-      .eq("quest_date", today);
-    await supabase.rpc("award_xp", { _amount: q.xp_reward, _source: "daily_quest", _mission: q.slug });
-    toast.success(`+${q.xp_reward} XP, +${q.coin_reward} coins!`, { description: q.title });
+    const { data, error } = await supabase.rpc("claim_quest_reward", { _quest_id: q.id });
+    if (error) {
+      toast.error("Could not claim", { description: error.message });
+      return;
+    }
+    const result = data as { claimed: boolean; xp?: number; coins?: number; reason?: string };
+    if (!result.claimed) {
+      toast.message("Already claimed", { description: result.reason });
+      return;
+    }
+    toast.success(`+${result.xp} XP, +${result.coins} coins!`, { description: q.title });
     load();
   }
 

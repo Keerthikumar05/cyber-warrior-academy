@@ -16,6 +16,7 @@ export function PlayerHUD() {
   const [userId, setUserId] = useState<string | null>(null);
   const [profile, setProfile] = useState<ProfileSnap | null>(null);
   const [guest, setGuest] = useState<GuestProgress>(() => readGuest());
+  const [questsDoneToday, setQuestsDoneToday] = useState(0);
 
   useEffect(() => {
     let unsub = () => {};
@@ -38,18 +39,20 @@ export function PlayerHUD() {
   useEffect(() => {
     if (!userId) {
       setProfile(null);
+      setQuestsDoneToday(0);
       return;
     }
+    const today = new Date().toISOString().slice(0, 10);
     (async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("xp,level,coins,username")
-        .eq("id", userId)
-        .maybeSingle();
-      if (data) setProfile({ xp: data.xp, level: data.level, coins: data.coins, username: data.username });
+      const [{ data: p }, { data: qp }] = await Promise.all([
+        supabase.from("profiles").select("xp,level,coins,username").eq("id", userId).maybeSingle(),
+        supabase.from("user_quest_progress").select("completed").eq("user_id", userId).eq("quest_date", today),
+      ]);
+      if (p) setProfile({ xp: p.xp, level: p.level, coins: p.coins, username: p.username });
+      setQuestsDoneToday((qp ?? []).filter((r) => r.completed).length);
     })();
     const channel = supabase
-      .channel(`profile:${userId}`)
+      .channel(`hud:${userId}`)
       .on(
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${userId}` },
@@ -58,11 +61,25 @@ export function PlayerHUD() {
           setProfile({ xp: row.xp, level: row.level, coins: row.coins, username: row.username });
         },
       )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "user_quest_progress", filter: `user_id=eq.${userId}` },
+        async () => {
+          const today2 = new Date().toISOString().slice(0, 10);
+          const { data: qp } = await supabase
+            .from("user_quest_progress")
+            .select("completed")
+            .eq("user_id", userId)
+            .eq("quest_date", today2);
+          setQuestsDoneToday((qp ?? []).filter((r) => r.completed).length);
+        },
+      )
       .subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
   }, [userId]);
+
 
   const xp = profile?.xp ?? guest.xp;
   const level = profile?.level ?? levelFromXp(guest.xp);
@@ -91,6 +108,9 @@ export function PlayerHUD() {
         <nav className="hidden md:flex items-center gap-1 text-xs">
           <Link to="/quests" className="px-2 py-1 rounded hover:bg-surface-2 text-muted-foreground hover:text-primary flex items-center gap-1" title="Daily Quests">
             <Target className="size-3.5" /> QUESTS
+            {userId && questsDoneToday > 0 && (
+              <span className="ml-1 text-[10px] neon-gold font-bold">{questsDoneToday}✓</span>
+            )}
           </Link>
           <Link to="/battle" className="px-2 py-1 rounded hover:bg-surface-2 text-muted-foreground hover:text-secondary flex items-center gap-1" title="1v1 Battle">
             <Swords className="size-3.5" /> BATTLE
