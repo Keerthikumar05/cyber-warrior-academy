@@ -91,8 +91,8 @@ export async function awardCloud(opts: {
     _world: opts.worldSlug,
     _mission: opts.missionSlug,
     _xp: opts.xp,
-    _badge: opts.badgeSlug ?? null,
-    _badge_name: opts.badgeName ?? null,
+    _badge: opts.badgeSlug ?? undefined,
+    _badge_name: opts.badgeName ?? undefined,
     _score: opts.score ?? 100,
   });
   if (error) throw error;
