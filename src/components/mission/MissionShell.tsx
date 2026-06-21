@@ -54,15 +54,38 @@ export function MissionShell({ mission }: Props) {
     const { data } = await supabase.auth.getSession();
     if (data.session) {
       try {
-        await awardCloud({
+        const res = await awardCloud({
           xp: reward,
           worldSlug: mission.worldSlug,
           missionSlug: mission.slug,
           badgeSlug: step.badgeSlug,
           badgeName: step.badgeName,
         });
+        if (res?.firstTime) {
+          toast.success(`+${reward} XP earned!`, {
+            description: step.badgeName ? `Badge unlocked: ${step.badgeName}` : "Mission complete.",
+          });
+          // Achievement notifications for quest progress
+          for (const q of res.quests) {
+            if (q.newly_completed) {
+              toast.success(`🏆 Quest complete: ${q.title}`, {
+                description: `Claim +${q.xp_reward} XP, +${q.coin_reward} coins on the Quests page.`,
+                duration: 6000,
+              });
+            } else if (q.progress > 0) {
+              toast.message(`Quest progress: ${q.title}`, {
+                description: `${q.progress} / ${q.target}`,
+              });
+            }
+          }
+        } else {
+          toast.message("Mission replayed", {
+            description: "Already cleared — no duplicate rewards.",
+          });
+        }
       } catch (e) {
         console.error(e);
+        toast.error("Could not save progress", { description: (e as Error).message });
       }
     } else {
       awardGuest({
@@ -71,10 +94,10 @@ export function MissionShell({ mission }: Props) {
         missionSlug: mission.slug,
         badgeSlug: step.badgeSlug,
       });
+      toast.success(`+${reward} XP earned!`, {
+        description: step.badgeName ? `Badge unlocked: ${step.badgeName}` : "Mission complete.",
+      });
     }
-    toast.success(`+${reward} XP earned!`, {
-      description: step.badgeName ? `Badge unlocked: ${step.badgeName}` : "Mission complete.",
-    });
     setCompleted(true);
 
     if (!data.session) {
