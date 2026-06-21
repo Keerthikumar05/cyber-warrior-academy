@@ -617,6 +617,18 @@ export type Database = {
           new_xp: number
         }[]
       }
+      claim_quest_reward: { Args: { _quest_id: string }; Returns: Json }
+      complete_mission: {
+        Args: {
+          _badge?: string
+          _badge_name?: string
+          _mission: string
+          _score?: number
+          _world: string
+          _xp: number
+        }
+        Returns: Json
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
