@@ -108,6 +108,9 @@ export function PlayerHUD() {
         <nav className="hidden md:flex items-center gap-1 text-xs">
           <Link to="/quests" className="px-2 py-1 rounded hover:bg-surface-2 text-muted-foreground hover:text-primary flex items-center gap-1" title="Daily Quests">
             <Target className="size-3.5" /> QUESTS
+            {userId && questsDoneToday > 0 && (
+              <span className="ml-1 text-[10px] neon-gold font-bold">{questsDoneToday}✓</span>
+            )}
           </Link>
           <Link to="/battle" className="px-2 py-1 rounded hover:bg-surface-2 text-muted-foreground hover:text-secondary flex items-center gap-1" title="1v1 Battle">
             <Swords className="size-3.5" /> BATTLE
