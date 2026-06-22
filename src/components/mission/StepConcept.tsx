@@ -1,9 +1,15 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { motion } from "motion/react";
 import type { ConceptStep, DSOp } from "@/lib/missions/types";
 import { Check, X, ArrowRight } from "lucide-react";
+import { AlgoVisualizer } from "@/components/viz/AlgoVisualizer";
 
-export function StepConcept({ step }: { step: ConceptStep }) {
+interface StepConceptProps {
+  step: ConceptStep;
+  onContext?: (c: { missionBrief?: string }) => void;
+}
+
+export function StepConcept({ step, onContext }: StepConceptProps) {
   return (
     <div className="grid md:grid-cols-2 gap-6">
       <div className="panel p-6">
@@ -11,13 +17,19 @@ export function StepConcept({ step }: { step: ConceptStep }) {
         <p className="mt-3 text-foreground/85 leading-relaxed whitespace-pre-line">{step.body}</p>
       </div>
       <div className="panel p-6 min-h-[280px]">
-        <Demo demo={step.demo} />
+        <Demo demo={step.demo} onContext={onContext} />
       </div>
     </div>
   );
 }
 
-function Demo({ demo }: { demo: ConceptStep["demo"] }) {
+function Demo({
+  demo,
+  onContext,
+}: {
+  demo: ConceptStep["demo"];
+  onContext?: (c: { missionBrief?: string }) => void;
+}) {
   if (demo.type === "sequence-demo") return <SequenceDemo items={demo.items} />;
   if (demo.type === "truth-table") return <TruthTable rows={demo.rows} />;
   if (demo.type === "loop-counter") return <LoopCounter from={demo.from} to={demo.to} />;
@@ -25,7 +37,31 @@ function Demo({ demo }: { demo: ConceptStep["demo"] }) {
   if (demo.type === "var-box") return <VarBox values={demo.values} />;
   if (demo.type === "ds-viz") return <DSViz structure={demo.structure} ops={demo.ops} />;
   if (demo.type === "bug-diff") return <BugDiff before={demo.before} after={demo.after} explain={demo.explain} />;
+  if (demo.type === "algo-viz") return <AlgoVizDemo demo={demo} onContext={onContext} />;
   return null;
+}
+
+function AlgoVizDemo({
+  demo,
+  onContext,
+}: {
+  demo: Extract<ConceptStep["demo"], { type: "algo-viz" }>;
+  onContext?: (c: { missionBrief?: string }) => void;
+}) {
+  const handleFrame = useCallback(
+    (info: { algo: string; index: number; total: number; note: string }) => {
+      onContext?.({
+        missionBrief: `Visualizer (${info.algo}) — frame ${info.index + 1}/${info.total}: ${info.note}`,
+      });
+    },
+    [onContext],
+  );
+  return (
+    <AlgoVisualizer
+      spec={{ algo: demo.algo, input: demo.input, target: demo.target }}
+      onFrameChange={handleFrame}
+    />
+  );
 }
 
 function SequenceDemo({ items }: { items: string[] }) {

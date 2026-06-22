@@ -17,6 +17,7 @@ import { Route as GuildsRouteImport } from './routes/guilds'
 import { Route as ForumRouteImport } from './routes/forum'
 import { Route as BattleRouteImport } from './routes/battle'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AlgoDemoRouteImport } from './routes/algo-demo'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ForumThreadIdRouteImport } from './routes/forum.$threadId'
 import { Route as PlayWorldMissionRouteImport } from './routes/play.$world.$mission'
@@ -61,6 +62,11 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AlgoDemoRoute = AlgoDemoRouteImport.update({
+  id: '/algo-demo',
+  path: '/algo-demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -79,6 +85,7 @@ const PlayWorldMissionRoute = PlayWorldMissionRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/algo-demo': typeof AlgoDemoRoute
   '/auth': typeof AuthRoute
   '/battle': typeof BattleRoute
   '/forum': typeof ForumRouteWithChildren
@@ -92,6 +99,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/algo-demo': typeof AlgoDemoRoute
   '/auth': typeof AuthRoute
   '/battle': typeof BattleRoute
   '/forum': typeof ForumRouteWithChildren
@@ -106,6 +114,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/algo-demo': typeof AlgoDemoRoute
   '/auth': typeof AuthRoute
   '/battle': typeof BattleRoute
   '/forum': typeof ForumRouteWithChildren
@@ -121,6 +130,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/algo-demo'
     | '/auth'
     | '/battle'
     | '/forum'
@@ -134,6 +144,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/algo-demo'
     | '/auth'
     | '/battle'
     | '/forum'
@@ -147,6 +158,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/algo-demo'
     | '/auth'
     | '/battle'
     | '/forum'
@@ -161,6 +173,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AlgoDemoRoute: typeof AlgoDemoRoute
   AuthRoute: typeof AuthRoute
   BattleRoute: typeof BattleRoute
   ForumRoute: typeof ForumRouteWithChildren
@@ -230,6 +243,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/algo-demo': {
+      id: '/algo-demo'
+      path: '/algo-demo'
+      fullPath: '/algo-demo'
+      preLoaderRoute: typeof AlgoDemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -266,6 +286,7 @@ const ForumRouteWithChildren = ForumRoute._addFileChildren(ForumRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AlgoDemoRoute: AlgoDemoRoute,
   AuthRoute: AuthRoute,
   BattleRoute: BattleRoute,
   ForumRoute: ForumRouteWithChildren,
@@ -279,13 +300,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
