@@ -27,7 +27,8 @@ export interface ConceptStep {
     | { type: "code-trace"; lines: string[]; explain: string[] }
     | { type: "var-box"; values: Array<{ name: string; value: string; type: string }> }
     | { type: "ds-viz"; structure: "array" | "stack" | "queue" | "linked-list" | "tree"; ops: DSOp[] }
-    | { type: "bug-diff"; before: string; after: string; explain: string };
+    | { type: "bug-diff"; before: string; after: string; explain: string }
+    | { type: "algo-viz"; algo: "linear-search" | "binary-search" | "bubble-sort" | "merge-sort"; input: number[]; target?: number };
 }
 
 /** One animation frame for a data-structure visualization. */

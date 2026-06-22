@@ -126,7 +126,12 @@ export function MissionShell({ mission }: Props) {
       case "intro":
         return <StepIntro step={step} />;
       case "concept":
-        return <StepConcept step={step} />;
+        return (
+          <StepConcept
+            step={step}
+            onContext={(c) => setMentorCtx((prev) => ({ ...prev, ...c }))}
+          />
+        );
       case "practice":
         return <StepPractice step={step} onSolved={() => setCanAdvance(true)} />;
       case "code":

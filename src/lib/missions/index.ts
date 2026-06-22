@@ -3,6 +3,7 @@ import { logicLandMissions } from "./logic-land";
 import { pythonKingdomMissions } from "./python-kingdom";
 import { bugHunterCityMissions } from "./bug-hunter-city";
 import { dataStructureArenaMissions } from "./data-structure-arena";
+import { algorithmWarzoneMissions } from "./algorithm-warzone";
 
 export const worlds: World[] = [
   {
@@ -51,11 +52,11 @@ export const worlds: World[] = [
     slug: "algorithm-warzone",
     name: "Algorithm Warzone",
     tagline: "Sort. Search. Conquer.",
-    description: "Boss battles for sorting, searching, recursion, DP, greedy, backtracking.",
-    status: "soon",
+    description: "Learn search, sort, recursion, DP, greedy, and backtracking through visual missions.",
+    status: "available",
     accent: "red",
     order: 5,
-    missions: [],
+    missions: algorithmWarzoneMissions.map((m) => m.slug),
   },
   {
     slug: "web-developer-realm",
@@ -94,6 +95,7 @@ export const allMissions: Mission[] = [
   ...pythonKingdomMissions,
   ...bugHunterCityMissions,
   ...dataStructureArenaMissions,
+  ...algorithmWarzoneMissions,
 ];
 
 export function getWorld(slug: string): World | undefined {
