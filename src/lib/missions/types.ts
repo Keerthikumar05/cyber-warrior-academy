@@ -28,7 +28,24 @@ export interface ConceptStep {
     | { type: "var-box"; values: Array<{ name: string; value: string; type: string }> }
     | { type: "ds-viz"; structure: "array" | "stack" | "queue" | "linked-list" | "tree"; ops: DSOp[] }
     | { type: "bug-diff"; before: string; after: string; explain: string }
-    | { type: "algo-viz"; algo: "linear-search" | "binary-search" | "bubble-sort" | "merge-sort"; input: number[]; target?: number };
+    | {
+        type: "algo-viz";
+        algo:
+          | "linear-search"
+          | "binary-search"
+          | "bubble-sort"
+          | "merge-sort"
+          | "recursion"
+          | "greedy"
+          | "dp"
+          | "backtracking";
+        input: number[];
+        target?: number;
+        n?: number;
+        coins?: number[];
+        amount?: number;
+        variant?: string;
+      };
 }
 
 /** One animation frame for a data-structure visualization. */
