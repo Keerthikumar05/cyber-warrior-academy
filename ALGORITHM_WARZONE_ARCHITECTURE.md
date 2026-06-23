@@ -1,93 +1,100 @@
-# Algorithm Warzone — Architecture (Phase 4, missions 1–4)
+# Algorithm Warzone — Architecture (Updated, Missions 1–8)
 
-## Goal
-A *learning* world for the eight core algorithm topics. Intuition and visualization first, optimization later. Missions reuse the existing `MissionShell` pipeline; no new schemas, no new mission step kinds.
+Algorithm Warzone is a **learning world**. All eight missions reuse the same
+mission shell (Intro → Concept → Practice → Code → Boss → Mastery) and share a
+single frame-driven visualizer.
 
 ## Layered model
 
-```
-       ┌──────────────────────────────────────────────────────────┐
-       │  src/lib/missions/algorithm-warzone.ts                   │
-       │   Mission[]  ── content, briefs, tests, boss, mastery    │
-       └─────────────────────┬────────────────────────────────────┘
-                             │  ConceptStep.demo = { type: "algo-viz", … }
-                             ▼
-       ┌──────────────────────────────────────────────────────────┐
-       │  src/components/viz/AlgoVisualizer.tsx                   │
-       │   Generic frame renderer: bars / cells, pointers,        │
-       │   highlights, scrub bar, play/pause/speed                │
-       └─────────────────────┬────────────────────────────────────┘
-                             │  Frame[]
-                             ▼
-       ┌──────────────────────────────────────────────────────────┐
-       │  src/lib/algorithms/*                                    │
-       │   Pure generateFrames(spec) — no React, no DOM           │
-       │   linear-search · binary-search · bubble-sort · merge-sort│
-       └──────────────────────────────────────────────────────────┘
+```text
++----------------------------------------------------------------+
+|  src/lib/missions/algorithm-warzone.ts   (content)             |
+|  - 8 missions, each step kind drives a UI component            |
++----------------------------------------------------------------+
+|  src/components/viz/AlgoVisualizer.tsx   (renderer)            |
+|  - Plays Frame[] with controls; renders array | grid | tree    |
+|  - Surfaces call stack chips; forwards frame note to AI mentor |
++----------------------------------------------------------------+
+|  src/lib/algorithms/*.ts                 (generators)          |
+|  - Pure functions: (AlgoSpec) -> Frame[]                       |
+|  - 8 algos: linear, binary, bubble, merge, recursion, greedy,  |
+|    dp, backtracking                                            |
++----------------------------------------------------------------+
+|  src/lib/algorithms/types.ts             (frame primitives)    |
+|  - Frame: { array | tree | grid, highlights, pointers, stack } |
++----------------------------------------------------------------+
 ```
 
-## Frame schema (`src/lib/algorithms/types.ts`)
+## Frame primitives (extended in Phase 2)
 
-One shape, used by every algorithm:
+A `Frame` may carry any combination of:
 
-```ts
-interface Frame {
-  array: (number | string)[];
-  highlights?: { indices: number[]; role: FrameRole }[];
-  pointers?:   { name: string; index: number }[];
-  subArrays?:  { start: number; end: number; label?: string }[];
-  note: string;             // one-line teaching narration
-  stats?: Record<string, number>;
-}
-```
+- `array` + `highlights` + `pointers` + `subArrays` — the original
+  search/sort visualization.
+- `tree: FrameTreeNode[]` — recursion / decision trees. Nodes carry a
+  `status` (`active | returned | base | pruned | chosen`) and an optional
+  `detail` (e.g. `= 5 × 24 = 120`). Layout is computed from `parentId`.
+- `grid: { rows, cols, cells, caption? }` — DP tables and chess boards.
+  Each cell has a `value`, optional `role` (driving color), and `label`.
+- `stack: string[]` — live call stack, rendered as chips alongside the
+  visualization.
 
-`FrameRole = "compare" | "swap" | "pointer" | "sorted" | "pivot" | "found" | "window" | "merge" | "split" | "discard"` — the visualizer maps each role to a styled cell variant.
+`AlgoVisualizer` picks the right view automatically — if `frame.grid` is
+present it renders the grid; if `frame.tree` is present it renders the tree;
+otherwise it falls back to the array/bar view. A frame may include both
+(e.g. greedy renders the coin row AND a status caption).
 
-This single primitive scales to the next four missions (recursion stack, greedy choice, DP grid cells, backtracking decision tree) by adding new roles + a tree/grid render branch — no API churn.
+## Mission inventory
 
-## Mission step pipeline (unchanged)
+| #  | Slug             | View                  | Boss                  | Badge                          | XP  |
+| -- | ---------------- | --------------------- | --------------------- | ------------------------------ | --- |
+| 1  | `linear-search`  | array sweep           | All indices           | `scout`                        | 100 |
+| 2  | `binary-search`  | array window          | Insertion point       | `bisector`                     | 120 |
+| 3  | `bubble-sort`    | bars + swaps          | Optimized sort stats  | `bubbler`                      | 130 |
+| 4  | `merge-sort`     | split/merge sub-bars  | Full merge sort       | `divider`                      | 160 |
+| 5  | `recursion`      | call tree + stack     | Tower of Hanoi        | `echo-keeper`                  | 140 |
+| 6  | `greedy`         | coin row + verdict    | Min meeting rooms     | `quick-draw`                   | 150 |
+| 7  | `dp-basics`      | DP grid               | 0/1 knapsack          | `archivist`                    | 180 |
+| 8  | `backtracking`   | n×n chess board       | Rat in a Maze         | `algorithm-warzone-veteran` ★  | 200 |
 
-`intro → concept(algo-viz) → practice → code → boss → mastery`
+★ World-completion badge granted by the final mastery step.
 
-Only one piece is new: `ConceptStep.demo` now accepts `{ type: "algo-viz"; algo; input; target? }`. The `StepConcept` component routes that into `<AlgoVisualizer />` and forwards the current frame note to `MissionShell`'s mentor context, so Cipher's hints are frame-aware.
+## AI mentor wiring
 
-## AI mentor — frame-aware
+`StepConcept` forwards each frame's `note` to the `MissionShell` mentor
+context as `missionBrief`. The mentor RPC sees the user's last visible step
+verbatim, so its hints are grounded in *what the learner is looking at* —
+e.g. "you're currently at the merge step combining [3,9] with [27,43]".
+This is unchanged from Phase 1; the new views (tree, grid) automatically
+benefit because they share the same `onFrameChange` plumbing.
 
-`MentorContext` already carries `missionBrief`. We append `\n\nCurrent frame: <note>` whenever `AlgoVisualizer` advances, so:
+## Platform integrations
 
-- "Give me a hint" → Cipher sees what the learner is staring at.
-- "Explain this step" → answers in terms of the actual sub-array / pointer.
+All 8 missions call the existing `complete_mission` RPC. That single
+transaction handles:
 
-No new server fn, no migrations.
+- XP and coin grant (atomic, no duplicates).
+- Streak progression.
+- Daily quest auto-progression (`complete_missions`, `earn_xp`,
+  `complete_world`).
+- Badge unlock (per-mission badge + the `algorithm-warzone-veteran`
+  completion badge on mission 8).
+- Real-time leaderboard / HUD updates via the `user_quest_progress` and
+  `profiles` realtime channels.
 
-## Coding challenges & hidden tests
+No schema change is required for missions 5–8.
 
-Every mission has two code surfaces:
+## Files added in Phase 2
 
-- `code` step — guided implementation of the algorithm itself (e.g. `linear_search`).
-- `boss` step — a harder variant (e.g. all-indices, insertion point, optimized stats).
-
-Tests use the existing `CodeTest` shape from `src/lib/missions/types.ts`:
-
-- `expectExact` / `expectIncludes` — printed output checks.
-- `expectEval { expr, equals }` — runs an extra Pyodide expression against the student's namespace to validate the *function itself* (the "hidden tests" requirement). This catches solutions that hard-code the demo output.
-
-## Integration with the rest of the platform
-
-| System | Wiring |
-|---|---|
-| **XP** | `MasteryStep.xpReward` flows through `complete_mission` RPC (unchanged). |
-| **Daily quests** | `complete_mission` already progresses `complete_missions`, `earn_xp`, and `complete_world` quest types — Warzone missions get auto-progression for free. |
-| **Leaderboards** | XP awarded by the RPC publishes through the existing realtime channel on `profiles` / `leaderboard_*`. |
-| **Guilds** | Member XP rolls up to guild totals on the existing leaderboard view. |
-| **AI mentor** | Same `askMentor` server fn; richer context via per-frame note. |
-| **Badges** | Each Warzone mission grants a unique badge slug (`scout`, `bisector`, `bubbler`, `divider`). |
-
-## What was NOT built (deferred to missions 5–8)
-
-- Recursion call-stack tree visualizer (extends `Frame` with `tree`).
-- DP grid cell visualizer (extends `Frame` with `grid`).
-- Backtracking decision tree with prune marks.
-- Greedy choice highlighter.
-
-Their generators will live next to the current four, sharing the same `Frame` shape — no visualizer rewrite expected.
+- `src/lib/algorithms/recursion.ts` — factorial call-tree generator.
+- `src/lib/algorithms/greedy.ts` — coin-change generator (incl.
+  counterexample variant) with brute-force optimum check.
+- `src/lib/algorithms/dp.ts` — climbing-stairs DP table generator.
+- `src/lib/algorithms/backtracking.ts` — N-Queens board generator with
+  prune frames.
+- `src/lib/missions/algorithm-warzone.ts` — extended with missions 5–8.
+- `src/components/viz/AlgoVisualizer.tsx` — added `TreeView`, `GridView`,
+  and call-stack chips.
+- `src/lib/__tests__/algorithms.test.ts` — added coverage for all four
+  new generators and the 8-mission integration.
+- `src/routes/algo-demo.tsx` — added presets and a counterexample panel.

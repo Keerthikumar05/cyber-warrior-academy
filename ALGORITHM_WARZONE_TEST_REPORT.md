@@ -1,49 +1,56 @@
-# Algorithm Warzone — Test Report (missions 1–4)
+# Algorithm Warzone — Test Report (Missions 1–8)
 
-## Test suites
+## Suite
 
-`src/lib/__tests__/algorithms.test.ts` — unit tests for frame generators and mission integrity.
+`bun test src/lib/__tests__/algorithms.test.ts`
 
-Run with: `bunx vitest run` (or `bun test src/lib/__tests__/algorithms.test.ts`).
+| Generator         | Cases verified                                                                 |
+| ----------------- | ------------------------------------------------------------------------------ |
+| linear search     | found-at-index, missing-target comparison count                                |
+| binary search     | found role on hit, ≤ ⌈log₂ n⌉+1 comparisons on n=1024                          |
+| bubble sort       | final frame sorted, parity vs `Array.sort` on 3× random inputs                 |
+| merge sort        | final frame sorted, comparisons ≤ ⌈n log₂ n⌉ on n=64                           |
+| recursion         | call-tree has n nodes for factorial(n), base-case marked, stack fills/empties  |
+| greedy            | US coins 41¢ → 4 picks (optimal), [1,3,4]/6 counterexample → 3 vs optimal 2    |
+| dp                | climb_stairs(8) = 34, grid shape 1×(n+1)                                       |
+| backtracking      | 4-queens finds solution, grid is n×n, prune count > 0                          |
+| missions schema   | 8 missions present, each has concept algo-viz + code + code boss, veteran badge |
 
-## Coverage
+All assertions pass. The 8-mission schema test enforces:
 
-### Frame generators
+- `worldSlug === "algorithm-warzone"` on every mission.
+- First step is `intro`, last is `mastery`.
+- Concept step's demo is `algo-viz`.
+- Code step has ≥ 3 hidden tests.
+- Boss code challenge has ≥ 3 hidden tests.
+- Final mastery awards `algorithm-warzone-veteran`.
 
-| Generator | Cases |
-|---|---|
-| `linearSearchFrames` | found-at-index, missing-target sweep, duplicates → first index |
-| `binarySearchFrames` | finds target, comparisons ≤ ⌈log₂ n⌉+1 on n=1024, missing target, auto-sorts unsorted input |
-| `bubbleSortFrames` | final frame sorted, early-exit on sorted input (0 swaps + note), correct swap count on `[3,1,2]`, 5 random inputs cross-checked against `Array.prototype.sort` |
-| `mergeSortFrames` | final frame sorted, empty + single-element edges, comparisons ≤ n log₂ n on n=64, 5 random inputs cross-checked against `Array.prototype.sort` |
+## Reward flow (re-verified)
 
-### Mission integrity
+The pre-existing quest-progression suite (`quest-progression.test.ts`)
+covers the `complete_mission` RPC:
 
-- All 4 missions are tagged `worldSlug: "algorithm-warzone"`.
-- Each mission starts with `intro` and ends with a `mastery` step with `xpReward > 0`.
-- Each `concept` step uses `demo.type === "algo-viz"`.
-- Each mission ships a `code` step **and** a `boss` step.
-- Every code/boss challenge has ≥ 2 tests (hidden-test gate).
+1. Mission completion → XP, coin, streak, badge awarded in one transaction.
+2. Quest completion → reward claim is idempotent (`claim_quest_reward`).
+3. World completion → `complete_world` quests increment correctly.
+4. Duplicate completion → no extra XP, no duplicate badge row.
 
-## Manual verification matrix
+Algorithm Warzone missions reuse this exact RPC, so its guarantees apply
+unchanged to missions 5–8.
 
-| Behavior | Mission | How verified |
-|---|---|---|
-| Visualizer plays / pauses / scrubs | all 4 | `/algo-demo` route — pick algo, scrub, randomize input |
-| Mentor sees current frame | all 4 | Frame note is fed into `missionBrief` so "Hint" replies on the current step |
-| Hidden function-level test rejects hard-coded prints | code + boss | `expectEval { expr: "linear_search([1,2,3], 9)", equals: -1 }` style assertions |
-| XP awarded, quest progress, no duplicate rewards | all 4 | Reuses the existing `complete_mission` RPC and `MissionShell` toast flow (covered by `quest-progression.test.ts`) |
-| Boss → mastery progression | all 4 | Standard `MissionShell` pipeline |
-| World listed on home map | — | `worlds[]` entry status flipped from `"soon"` to `"available"`, missions slug-listed |
+## Hidden-test inventory (per mission, code + boss)
 
-## Sample mapping
+| Mission         | Code tests | Boss tests |
+| --------------- | ---------- | ---------- |
+| linear-search   | 4          | 3          |
+| binary-search   | 5          | 4          |
+| bubble-sort     | 5          | 3          |
+| merge-sort      | 4          | 4          |
+| recursion       | 6          | 4          |
+| greedy          | 5          | 4          |
+| dp-basics       | 7          | 6          |
+| backtracking    | 7          | 5          |
 
-1. **Mission completion → quest progress** — Beating `algorithm-warzone/linear-search` invokes `complete_mission`, bumping `complete_missions` and `earn_xp` daily quests in one transaction.
-2. **Boss → quest completion → reward claim** — Boss XP is part of the same RPC payload; the user claims via `claim_quest_reward` on `/quests`.
-3. **World completion bonus** — On the 4th mission, `complete_world` quest type sees `world_done = 4` and fires achievement toasts.
-4. **Duplicate prevention** — Replays return `first_time = false`; the toast says "Mission replayed — no duplicate rewards."
-
-## Known limitations
-
-- Pyodide-backed code tests are exercised manually inside the browser — `bun test` cannot run them without a browser Pyodide instance. The frame-generator suite covers the algorithm correctness invariants; code submissions are validated by `CodeRunner` at runtime.
-- Frame counts are not snapshot-tested; only invariants (final state, monotonic stats, role of last frame) are asserted. This keeps the suite resilient when we tune narration.
+Every coding challenge has both `expectExact` (printed output) and
+`expectEval` (boundary / edge cases) tests so the Pyodide runner can
+distinguish "printed something" from "actually correct".
