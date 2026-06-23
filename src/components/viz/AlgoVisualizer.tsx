@@ -1,15 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Play, Pause, SkipBack, SkipForward, RotateCcw, Gauge } from "lucide-react";
 import { generateFrames } from "@/lib/algorithms";
-import type { AlgoSpec, Frame, FrameRole } from "@/lib/algorithms/types";
+import type { AlgoSpec, Frame, FrameRole, FrameTreeNode } from "@/lib/algorithms/types";
 
 interface Props {
   spec: AlgoSpec;
-  /** Called whenever the active frame changes — used to feed AI mentor context. */
   onFrameChange?: (info: { algo: string; index: number; total: number; note: string }) => void;
-  /** Auto-start playback on mount. */
   autoPlay?: boolean;
-  /** Initial playback speed in ms per frame. */
   initialDelayMs?: number;
 }
 
@@ -24,6 +21,20 @@ const ROLE_CLASS: Record<FrameRole, string> = {
   merge: "border-secondary/60 bg-secondary/10 text-secondary",
   split: "border-muted-foreground/60 bg-surface-2",
   discard: "border-destructive/40 bg-destructive/10 text-destructive/70 opacity-50",
+  chosen: "border-success glow-ring-cyan bg-success/20 text-success",
+  rejected: "border-destructive/50 bg-destructive/10 text-destructive/70",
+  filled: "border-primary/50 bg-primary/10 text-foreground",
+  current: "border-accent glow-ring-gold bg-accent/20 text-accent",
+  pruned: "border-destructive/60 bg-destructive/15 text-destructive opacity-70",
+  base: "border-success/70 bg-success/20 text-success",
+};
+
+const TREE_STATUS_CLASS: Record<NonNullable<FrameTreeNode["status"]>, string> = {
+  active: "border-primary glow-ring-cyan bg-primary/15 text-primary",
+  returned: "border-success/70 bg-success/15 text-success",
+  base: "border-success bg-success/25 text-success",
+  pruned: "border-destructive/60 bg-destructive/10 text-destructive opacity-70",
+  chosen: "border-accent glow-ring-gold bg-accent/15 text-accent",
 };
 
 export function AlgoVisualizer({
@@ -61,7 +72,6 @@ export function AlgoVisualizer({
     onFrameChange?.({ algo: spec.algo, index: i, total: frames.length, note: frame.note });
   }, [i, frame, frames.length, spec.algo, onFrameChange]);
 
-  // Highlight lookup: index → role
   const roleByIdx = new Map<number, FrameRole>();
   (frame.highlights ?? []).forEach((h) => h.indices.forEach((idx) => roleByIdx.set(idx, h.role)));
   const ptrByIdx = new Map<number, string[]>();
@@ -73,10 +83,12 @@ export function AlgoVisualizer({
 
   const max = Math.max(1, ...frame.array.map((v) => (typeof v === "number" ? v : 0)));
   const isSort = spec.algo === "bubble-sort" || spec.algo === "merge-sort";
+  const hasArray = frame.array.length > 0;
+  const hasTree = !!frame.tree && frame.tree.length > 0;
+  const hasGrid = !!frame.grid;
 
   return (
     <div className="space-y-3">
-      {/* Stats */}
       <div className="flex flex-wrap gap-2 text-[10px] uppercase tracking-widest">
         <span className="chip">Frame {i + 1} / {frames.length}</span>
         {frame.stats &&
@@ -87,52 +99,74 @@ export function AlgoVisualizer({
           ))}
       </div>
 
-      {/* Stage */}
       <div className="rounded-md border border-border bg-surface-2/40 p-4 min-h-[220px]">
-        {isSort ? (
-          <div className="flex items-end justify-center gap-1.5 h-[180px]">
-            {frame.array.map((v, idx) => {
-              const role = roleByIdx.get(idx);
-              const height = (Number(v) / max) * 100;
-              return (
-                <div key={idx} className="flex flex-col items-center gap-1 w-9">
-                  <div
-                    className={`w-full rounded-t border font-mono text-xs grid place-items-end pb-1 transition-all duration-300 ${
-                      role ? ROLE_CLASS[role] : "border-border bg-background text-foreground/80"
-                    }`}
-                    style={{ height: `${Math.max(12, height)}%` }}
-                  >
-                    {v}
-                  </div>
-                  <div className="text-[10px] text-muted-foreground">{idx}</div>
-                  {ptrByIdx.has(idx) && (
-                    <div className="text-[10px] font-mono text-accent">
-                      {ptrByIdx.get(idx)!.join(",")}
+        {hasGrid && <GridView grid={frame.grid!} />}
+        {hasTree && <TreeView nodes={frame.tree!} />}
+        {hasArray && !hasGrid && !hasTree && (
+          isSort ? (
+            <div className="flex items-end justify-center gap-1.5 h-[180px]">
+              {frame.array.map((v, idx) => {
+                const role = roleByIdx.get(idx);
+                const height = (Number(v) / max) * 100;
+                return (
+                  <div key={idx} className="flex flex-col items-center gap-1 w-9">
+                    <div
+                      className={`w-full rounded-t border font-mono text-xs grid place-items-end pb-1 transition-all duration-300 ${
+                        role ? ROLE_CLASS[role] : "border-border bg-background text-foreground/80"
+                      }`}
+                      style={{ height: `${Math.max(12, height)}%` }}
+                    >
+                      {v}
                     </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="flex flex-wrap items-end justify-center gap-1.5">
+                    <div className="text-[10px] text-muted-foreground">{idx}</div>
+                    {ptrByIdx.has(idx) && (
+                      <div className="text-[10px] font-mono text-accent">
+                        {ptrByIdx.get(idx)!.join(",")}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="flex flex-wrap items-end justify-center gap-1.5">
+              {frame.array.map((v, idx) => {
+                const role = roleByIdx.get(idx);
+                return (
+                  <div key={idx} className="flex flex-col items-center gap-1 w-12">
+                    <div
+                      className={`w-full h-12 grid place-items-center rounded border font-mono text-sm transition-all duration-300 ${
+                        role ? ROLE_CLASS[role] : "border-border bg-background"
+                      }`}
+                    >
+                      {v}
+                    </div>
+                    <div className="text-[10px] text-muted-foreground">{idx}</div>
+                    {ptrByIdx.has(idx) && (
+                      <div className="text-[10px] font-mono text-accent">
+                        ↑ {ptrByIdx.get(idx)!.join(",")}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )
+        )}
+        {/* Greedy uses array view too — the array is the coin row. */}
+        {hasArray && (hasGrid || hasTree) && (
+          <div className="mt-3 flex flex-wrap items-end justify-center gap-1.5">
             {frame.array.map((v, idx) => {
               const role = roleByIdx.get(idx);
               return (
                 <div key={idx} className="flex flex-col items-center gap-1 w-12">
                   <div
-                    className={`w-full h-12 grid place-items-center rounded border font-mono text-sm transition-all duration-300 ${
+                    className={`w-full h-10 grid place-items-center rounded border font-mono text-xs ${
                       role ? ROLE_CLASS[role] : "border-border bg-background"
                     }`}
                   >
                     {v}
                   </div>
-                  <div className="text-[10px] text-muted-foreground">{idx}</div>
-                  {ptrByIdx.has(idx) && (
-                    <div className="text-[10px] font-mono text-accent">
-                      ↑ {ptrByIdx.get(idx)!.join(",")}
-                    </div>
-                  )}
                 </div>
               );
             })}
@@ -148,9 +182,26 @@ export function AlgoVisualizer({
             ))}
           </div>
         )}
+
+        {frame.stack && frame.stack.length > 0 && (
+          <div className="mt-3 border-t border-border pt-2">
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
+              Call stack
+            </div>
+            <div className="flex flex-col-reverse gap-1 items-start">
+              {frame.stack.map((label, k) => (
+                <span
+                  key={k}
+                  className="chip font-mono text-xs border-accent/60 bg-accent/10 text-accent"
+                >
+                  {label}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Note */}
       <div className="text-sm text-foreground/90 font-mono bg-surface-2/60 border border-border rounded px-3 py-2 min-h-[44px]">
         <span className="text-[10px] uppercase tracking-widest text-muted-foreground mr-2">
           step
@@ -158,13 +209,8 @@ export function AlgoVisualizer({
         {frame.note}
       </div>
 
-      {/* Controls */}
       <div className="flex items-center gap-2 flex-wrap">
-        <button
-          className="btn-ghost-neon !py-1 !px-2 text-xs"
-          onClick={() => setI(0)}
-          aria-label="Reset"
-        >
+        <button className="btn-ghost-neon !py-1 !px-2 text-xs" onClick={() => setI(0)} aria-label="Reset">
           <RotateCcw className="size-3" /> Reset
         </button>
         <button
@@ -217,6 +263,77 @@ export function AlgoVisualizer({
           aria-label="Scrub frames"
         />
       </div>
+    </div>
+  );
+}
+
+function GridView({ grid }: { grid: NonNullable<Frame["grid"]> }) {
+  return (
+    <div className="flex flex-col items-center gap-2">
+      {grid.caption && (
+        <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
+          {grid.caption}
+        </div>
+      )}
+      <div
+        className="grid gap-1"
+        style={{ gridTemplateColumns: `repeat(${grid.cols}, minmax(0, 1fr))` }}
+      >
+        {grid.cells.flatMap((row, r) =>
+          row.map((cell, c) => (
+            <div
+              key={`${r}-${c}`}
+              className={`min-w-[40px] h-10 grid place-items-center rounded border font-mono text-xs transition-all duration-300 ${
+                cell.role ? ROLE_CLASS[cell.role] : "border-border bg-background text-foreground/80"
+              }`}
+              title={cell.label}
+            >
+              {cell.value}
+            </div>
+          )),
+        )}
+      </div>
+    </div>
+  );
+}
+
+function TreeView({ nodes }: { nodes: FrameTreeNode[] }) {
+  // Layout: assign depth via parent chain
+  const byId = new Map(nodes.map((n) => [n.id, n]));
+  const depth = new Map<string, number>();
+  function depthOf(id: string): number {
+    if (depth.has(id)) return depth.get(id)!;
+    const node = byId.get(id);
+    if (!node?.parentId) {
+      depth.set(id, 0);
+      return 0;
+    }
+    const d = depthOf(node.parentId) + 1;
+    depth.set(id, d);
+    return d;
+  }
+  nodes.forEach((n) => depthOf(n.id));
+  const maxDepth = Math.max(0, ...Array.from(depth.values()));
+  const levels: FrameTreeNode[][] = Array.from({ length: maxDepth + 1 }, () => []);
+  nodes.forEach((n) => levels[depth.get(n.id)!].push(n));
+
+  return (
+    <div className="flex flex-col items-center gap-2">
+      {levels.map((row, d) => (
+        <div key={d} className="flex flex-wrap gap-2 justify-center">
+          {row.map((n) => (
+            <div
+              key={n.id}
+              className={`px-2 py-1 rounded border font-mono text-[11px] min-w-[70px] text-center ${
+                n.status ? TREE_STATUS_CLASS[n.status] : "border-border bg-background"
+              }`}
+            >
+              <div>{n.label}</div>
+              {n.detail && <div className="text-[10px] opacity-80">{n.detail}</div>}
+            </div>
+          ))}
+        </div>
+      ))}
     </div>
   );
 }
