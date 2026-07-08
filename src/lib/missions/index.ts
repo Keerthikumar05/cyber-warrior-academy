@@ -4,6 +4,7 @@ import { pythonKingdomMissions } from "./python-kingdom";
 import { bugHunterCityMissions } from "./bug-hunter-city";
 import { dataStructureArenaMissions } from "./data-structure-arena";
 import { algorithmWarzoneMissions } from "./algorithm-warzone";
+import { webDeveloperRealmMissions } from "./web-developer-realm";
 
 export const worlds: World[] = [
   {
@@ -62,11 +63,11 @@ export const worlds: World[] = [
     slug: "web-developer-realm",
     name: "Web Developer Realm",
     tagline: "Build the web, one component at a time.",
-    description: "HTML, CSS, JS, React, Node, MongoDB — ship real apps.",
-    status: "soon",
+    description: "HTML, CSS, JS, React, Node, PostgreSQL — build and deploy real apps end to end.",
+    status: "available",
     accent: "purple",
     order: 6,
-    missions: [],
+    missions: webDeveloperRealmMissions.map((m) => m.slug),
   },
   {
     slug: "ai-dimension",
@@ -96,6 +97,7 @@ export const allMissions: Mission[] = [
   ...bugHunterCityMissions,
   ...dataStructureArenaMissions,
   ...algorithmWarzoneMissions,
+  ...webDeveloperRealmMissions,
 ];
 
 export function getWorld(slug: string): World | undefined {
