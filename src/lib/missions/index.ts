@@ -75,10 +75,10 @@ export const worlds: World[] = [
     name: "AI Dimension",
     tagline: "Tame intelligence.",
     description: "ML, AI, generative AI, prompt engineering, LLMs.",
-    status: "soon",
+    status: "available",
     accent: "gold",
     order: 7,
-    missions: [],
+    missions: aiDimensionMissions.map((m) => m.slug),
   },
   {
     slug: "placement-universe",
