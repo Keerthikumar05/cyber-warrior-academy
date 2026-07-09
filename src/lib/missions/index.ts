@@ -5,6 +5,7 @@ import { bugHunterCityMissions } from "./bug-hunter-city";
 import { dataStructureArenaMissions } from "./data-structure-arena";
 import { algorithmWarzoneMissions } from "./algorithm-warzone";
 import { webDeveloperRealmMissions } from "./web-developer-realm";
+import { aiDimensionMissions } from "./ai-dimension";
 
 export const worlds: World[] = [
   {
