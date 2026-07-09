@@ -5,6 +5,7 @@ import { bugHunterCityMissions } from "./bug-hunter-city";
 import { dataStructureArenaMissions } from "./data-structure-arena";
 import { algorithmWarzoneMissions } from "./algorithm-warzone";
 import { webDeveloperRealmMissions } from "./web-developer-realm";
+import { aiDimensionMissions } from "./ai-dimension";
 
 export const worlds: World[] = [
   {
@@ -74,10 +75,10 @@ export const worlds: World[] = [
     name: "AI Dimension",
     tagline: "Tame intelligence.",
     description: "ML, AI, generative AI, prompt engineering, LLMs.",
-    status: "soon",
+    status: "available",
     accent: "gold",
     order: 7,
-    missions: [],
+    missions: aiDimensionMissions.map((m) => m.slug),
   },
   {
     slug: "placement-universe",
@@ -98,6 +99,7 @@ export const allMissions: Mission[] = [
   ...dataStructureArenaMissions,
   ...algorithmWarzoneMissions,
   ...webDeveloperRealmMissions,
+  ...aiDimensionMissions,
 ];
 
 export function getWorld(slug: string): World | undefined {
