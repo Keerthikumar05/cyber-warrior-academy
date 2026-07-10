@@ -6,6 +6,7 @@ import { dataStructureArenaMissions } from "./data-structure-arena";
 import { algorithmWarzoneMissions } from "./algorithm-warzone";
 import { webDeveloperRealmMissions } from "./web-developer-realm";
 import { aiDimensionMissions } from "./ai-dimension";
+import { placementUniverseMissions } from "./placement-universe";
 
 export const worlds: World[] = [
   {
@@ -84,11 +85,11 @@ export const worlds: World[] = [
     slug: "placement-universe",
     name: "Placement Universe",
     tagline: "Get hired.",
-    description: "DSA, SQL, OS, DBMS, networks, system design, HR, mock interviews.",
-    status: "soon",
+    description: "DSA, aptitude, core CS, resume, HR, mock interviews, company tracks.",
+    status: "available",
     accent: "gold",
     order: 8,
-    missions: [],
+    missions: placementUniverseMissions.map((m) => m.slug),
   },
 ];
 
@@ -100,6 +101,7 @@ export const allMissions: Mission[] = [
   ...algorithmWarzoneMissions,
   ...webDeveloperRealmMissions,
   ...aiDimensionMissions,
+  ...placementUniverseMissions,
 ];
 
 export function getWorld(slug: string): World | undefined {
