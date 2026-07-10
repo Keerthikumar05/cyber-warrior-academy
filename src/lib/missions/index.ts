@@ -101,6 +101,7 @@ export const allMissions: Mission[] = [
   ...algorithmWarzoneMissions,
   ...webDeveloperRealmMissions,
   ...aiDimensionMissions,
+  ...placementUniverseMissions,
 ];
 
 export function getWorld(slug: string): World | undefined {
