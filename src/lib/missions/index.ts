@@ -85,11 +85,11 @@ export const worlds: World[] = [
     slug: "placement-universe",
     name: "Placement Universe",
     tagline: "Get hired.",
-    description: "DSA, SQL, OS, DBMS, networks, system design, HR, mock interviews.",
-    status: "soon",
+    description: "DSA, aptitude, core CS, resume, HR, mock interviews, company tracks.",
+    status: "available",
     accent: "gold",
     order: 8,
-    missions: [],
+    missions: placementUniverseMissions.map((m) => m.slug),
   },
 ];
 
