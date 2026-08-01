@@ -125,7 +125,9 @@ function RootComponent() {
 
   useEffect(() => {
     void import("@/lib/pwa-register").then((m) => m.registerPWA());
+    void import("@/lib/capacitor-native").then((m) => m.initNativeShell());
   }, []);
+
 
   return (
     <QueryClientProvider client={queryClient}>
