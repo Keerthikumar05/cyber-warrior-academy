@@ -80,11 +80,22 @@ function WorldMap() {
             >
               Begin Mission 1 <ArrowRight className="size-4" />
             </Link>
+            <a
+              href="https://github.com/Keerthikumar05/cyber-warrior-academy/releases/latest"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-download"
+            >
+              <Smartphone className="size-4" /> Download Android APK
+            </a>
             {!authed && (
               <Link to="/auth" className="btn-ghost-neon">
                 Sign in to save progress
               </Link>
             )}
+          </div>
+          <div className="mt-2 text-[10px] uppercase tracking-widest text-muted-foreground">
+            Android • Free Download
           </div>
           <div className="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">
             <CheckCircle2 className="size-3.5 text-primary" />
