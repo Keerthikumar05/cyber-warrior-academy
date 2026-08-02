@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
-import { Lock, Sparkles, Zap, Trophy, Bot, Compass, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Lock, Sparkles, Zap, Trophy, Bot, Compass, ArrowRight, CheckCircle2, Smartphone } from "lucide-react";
 import { PlayerHUD } from "@/components/hud/PlayerHUD";
 import { worlds, getMissionsForWorld } from "@/lib/missions";
 import { readGuest, type GuestProgress } from "@/lib/progress";
