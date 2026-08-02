@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
-import { Lock, Sparkles, Zap, Trophy, Bot, Compass, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Lock, Sparkles, Zap, Trophy, Bot, Compass, ArrowRight, CheckCircle2, Smartphone } from "lucide-react";
 import { PlayerHUD } from "@/components/hud/PlayerHUD";
 import { worlds, getMissionsForWorld } from "@/lib/missions";
 import { readGuest, type GuestProgress } from "@/lib/progress";
@@ -80,11 +80,21 @@ function WorldMap() {
             >
               Begin Mission 1 <ArrowRight className="size-4" />
             </Link>
+            <a
+              href="https://github.com/Keerthikumar05/cyber-warrior-academy/releases/download/v1.0.0/CodeQuest-v1.0.apk"
+              download="CodeQuest-v1.0.apk"
+              className="btn-download"
+            >
+              <Smartphone className="size-4" /> Download Android APK
+            </a>
             {!authed && (
               <Link to="/auth" className="btn-ghost-neon">
                 Sign in to save progress
               </Link>
             )}
+          </div>
+          <div className="mt-2 text-[10px] uppercase tracking-widest text-muted-foreground">
+            Android • Free Download
           </div>
           <div className="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">
             <CheckCircle2 className="size-3.5 text-primary" />

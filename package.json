@@ -1,16 +1,11 @@
 {
-  "name": "code-quest",
-  "version": "1.0.0",
-  "description": "Code Quest - Gamified Coding Learning Platform",
-  "main": "electron.cjs",
+  "name": "tanstack_start_ts",
   "private": true,
   "sideEffects": false,
   "type": "module",
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
-    "electron": "electron .",
-    "electron:build": "npm run build && electron-builder",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
@@ -97,8 +92,6 @@
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.2.0",
-    "electron": "^43.2.0",
-    "electron-builder": "^26.15.3",
     "eslint": "^9.32.0",
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-prettier": "^5.2.6",
@@ -110,20 +103,5 @@
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1",
     "vite": "^8.0.16"
-  },
-  "build": {
-    "appId": "com.codequest.academy",
-    "productName": "Code Quest",
-    "directories": {
-      "output": "desktop-release"
-    },
-    "files": [
-      "electron.cjs",
-      ".output/**/*",
-      "package.json"
-    ],
-    "win": {
-      "target": "nsis"
-    }
   }
 }

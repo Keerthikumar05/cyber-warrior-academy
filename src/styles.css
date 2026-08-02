@@ -211,6 +211,27 @@
   }
 }
 
+@utility btn-download {
+  background: var(--gradient-gold);
+  color: var(--accent-foreground);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.85rem 1.6rem;
+  border-radius: var(--radius);
+  box-shadow: var(--glow-gold);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  border: 0;
+}
+@utility btn-download {
+  &:hover { transform: translateY(-2px); filter: brightness(1.1); }
+  &:active { transform: translateY(0); }
+}
+
 @utility chip {
   display: inline-flex;
   align-items: center;
