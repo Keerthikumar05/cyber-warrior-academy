@@ -81,9 +81,8 @@ function WorldMap() {
               Begin Mission 1 <ArrowRight className="size-4" />
             </Link>
             <a
-              href="https://github.com/Keerthikumar05/cyber-warrior-academy/releases/latest"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="https://github.com/Keerthikumar05/cyber-warrior-academy/releases/download/v1.0.0/CodeQuest-v1.0.apk"
+              download="CodeQuest-v1.0.apk"
               className="btn-download"
             >
               <Smartphone className="size-4" /> Download Android APK
