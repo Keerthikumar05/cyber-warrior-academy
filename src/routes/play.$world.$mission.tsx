@@ -30,7 +30,7 @@ export const Route = createFileRoute("/play/$world/$mission")({
     <div className="min-h-screen grid place-items-center px-4">
       <div className="panel p-8 text-center">
         <h1 className="font-display text-xl neon-purple">Mission interrupted</h1>
-        <p className="text-sm text-muted-foreground mt-2">{error.message}</p>
+        <p className="text-sm text-muted-foreground mt-2">{error instanceof Error ? error.message : "Unexpected error"}</p>
         <a href="/" className="btn-hero inline-flex mt-4">Return to map</a>
       </div>
     </div>
