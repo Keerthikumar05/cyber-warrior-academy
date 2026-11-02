@@ -38,7 +38,7 @@ const ChatInput = z.object({
 
 export const askMentor = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => ChatInput.parse(d))
+  .validator((d: unknown) => ChatInput.parse(d))
   .handler(async ({ data, context }) => {
     const key = process.env.LOVABLE_API_KEY;
     if (!key) throw new Error("Missing LOVABLE_API_KEY");

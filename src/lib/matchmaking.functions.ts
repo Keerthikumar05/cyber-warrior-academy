@@ -65,7 +65,7 @@ export const leaveBattleQueue = createServerFn({ method: "POST" })
  */
 export const submitBattleSolution = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { battleId: string; code: string; passed: boolean }) => d)
+  .validator((d: { battleId: string; code: string; passed: boolean }) => d)
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
