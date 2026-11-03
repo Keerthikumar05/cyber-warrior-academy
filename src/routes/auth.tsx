@@ -25,6 +25,7 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [busy, setBusy] = useState(false);
+  const [authed, setAuthed] = useState(false);
 
   useEffect(() => {
     (async () => {
