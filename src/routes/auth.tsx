@@ -25,10 +25,12 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [busy, setBusy] = useState(false);
+  const [authed, setAuthed] = useState(false);
 
   useEffect(() => {
     (async () => {
       const { data } = await supabase.auth.getSession();
+      setAuthed(!!data.session);
       if (data.session) navigate({ to: "/" });
     })();
   }, [navigate]);
@@ -80,9 +82,11 @@ function AuthPage() {
   return (
     <div className="min-h-screen grid place-items-center px-4 grid-bg">
       <div className="panel p-7 w-full max-w-md animate-fade-in">
-        <Link to="/" className="text-xs text-muted-foreground inline-flex items-center gap-1 hover:text-primary mb-4">
-          <ArrowLeft className="size-3" /> Back to map
-        </Link>
+        {authed && (
+          <Link to="/" className="text-xs text-muted-foreground inline-flex items-center gap-1 hover:text-primary mb-4">
+            <ArrowLeft className="size-3" /> Back to map
+          </Link>
+        )}
         <div className="flex items-center gap-2">
           <div className="size-9 rounded-md grid place-items-center bg-gradient-to-br from-primary to-secondary">
             <Sparkles className="size-4 text-primary-foreground" />

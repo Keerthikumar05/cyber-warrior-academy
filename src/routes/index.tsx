@@ -1,7 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { motion } from "motion/react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Lock, Sparkles, Zap, Trophy, Bot, Compass, ArrowRight, CheckCircle2, Smartphone } from "lucide-react";
+import { Lock, Compass, ArrowRight, Loader2 } from "lucide-react";
 import { PlayerHUD } from "@/components/hud/PlayerHUD";
 import { worlds, getMissionsForWorld } from "@/lib/missions";
 import { readGuest, type GuestProgress } from "@/lib/progress";
@@ -10,14 +9,63 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Code Quest — Learn to code by saving the universe" },
-      { name: "description", content: "An AI-mentored coding game. Play guest missions, level up, and master Python from zero." },
+      { title: "Code Quest — World Map" },
+      { name: "description", content: "Pick a world, defeat bugs, and level up across 8 missions with Cipher, your AI mentor." },
       { property: "og:title", content: "Code Quest — World Map" },
       { property: "og:description", content: "Pick a world. Defeat bugs. Become a Code Warrior." },
     ],
   }),
-  component: WorldMap,
+  component: HomeGate,
 });
+
+// Home is the authenticated dashboard. Signed-out visitors are sent to /auth;
+// signed-in Warriors land directly on the world map.
+function HomeGate() {
+  const navigate = useNavigate();
+  const [authed, setAuthed] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!active) return;
+      if (data.session) {
+        setAuthed(true);
+      } else {
+        navigate({ to: "/auth", replace: true });
+      }
+    })();
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT") {
+        setAuthed(false);
+        navigate({ to: "/auth", replace: true });
+      } else if (event === "SIGNED_IN") {
+        setAuthed(true);
+      }
+    });
+    return () => {
+      active = false;
+      sub.subscription.unsubscribe();
+    };
+  }, [navigate]);
+
+  if (!authed) return <BootSplash />;
+  return <WorldMap />;
+}
+
+function BootSplash() {
+  return (
+    <div className="min-h-screen grid place-items-center grid-bg">
+      <div className="text-center">
+        <div className="mx-auto size-12 rounded-md grid place-items-center bg-gradient-to-br from-primary to-secondary glow-ring-cyan">
+          <Compass className="size-6 text-primary-foreground" />
+        </div>
+        <div className="mt-4 font-display text-lg tracking-widest neon-cyan">CODE QUEST</div>
+        <Loader2 className="mx-auto mt-4 size-5 animate-spin text-primary" />
+      </div>
+    </div>
+  );
+}
 
 const accentClass = {
   cyan: "from-primary/30 to-primary/5 border-primary/40 hover:glow-ring-cyan",
@@ -28,9 +76,9 @@ const accentClass = {
 } as const;
 
 function WorldMap() {
-  const [guest, setGuest] = useState<GuestProgress>(() => readGuest());
+  const [, setGuest] = useState<GuestProgress>(() => readGuest());
   const [cloudCompleted, setCloudCompleted] = useState<Set<string>>(new Set());
-  const [authed, setAuthed] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const onProg = () => setGuest(readGuest());
@@ -41,8 +89,8 @@ function WorldMap() {
   useEffect(() => {
     (async () => {
       const { data } = await supabase.auth.getSession();
-      setAuthed(!!data.session);
       if (data.session) {
+        setUserId(data.session.user.id);
         const { data: rows } = await supabase
           .from("user_progress")
           .select("world_slug,mission_slug,completed")
@@ -52,71 +100,24 @@ function WorldMap() {
     })();
   }, []);
 
-  const completedSet = authed ? cloudCompleted : new Set(Object.keys(guest.completed));
+  const completedSet = cloudCompleted;
 
   return (
     <div className="min-h-screen">
       <PlayerHUD />
 
-      {/* Hero */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 grid-bg opacity-50" />
-        <div className="absolute inset-0" style={{ background: "var(--gradient-hero)" }} />
-        <div className="relative mx-auto max-w-7xl px-4 py-20 sm:py-28 text-center">
-          <span className="chip glow-ring-purple/40 neon-purple"><Sparkles className="size-3" /> The universe is under attack</span>
-          <h1 className="mt-5 font-display text-4xl sm:text-6xl tracking-wide">
-            <span className="neon-cyan">BECOME A</span>{" "}
-            <span className="neon-purple">CODE WARRIOR</span>
-          </h1>
-          <p className="mt-5 max-w-2xl mx-auto text-foreground/80">
-            Bugs have corrupted the system. Choose a world, solve missions, and learn real programming —
-            guided by Cipher, your personal AI mentor.
-          </p>
-          <div className="mt-8 flex items-center justify-center gap-3 flex-wrap">
-            <Link
-              to="/play/$world/$mission"
-              params={{ world: "logic-land", mission: "awakening-sequence" }}
-              className="btn-hero"
-            >
-              Begin Mission 1 <ArrowRight className="size-4" />
-            </Link>
-            <a
-              href="https://github.com/Keerthikumar05/cyber-warrior-academy/releases/download/v1.0.0/CodeQuest-v1.0.apk"
-              download="CodeQuest-v1.0.apk"
-              className="btn-download"
-            >
-              <Smartphone className="size-4" /> Download Android APK
-            </a>
-            {!authed && (
-              <Link to="/auth" className="btn-ghost-neon">
-                Sign in to save progress
-              </Link>
-            )}
+      {/* Dashboard: World Map */}
+      <section className="mx-auto max-w-7xl px-4 pt-10 pb-12">
+        <div className="flex items-center justify-between gap-3 mb-6 flex-wrap">
+          <div className="flex items-center gap-3">
+            <Compass className="size-5 text-primary" />
+            <h2 className="font-display tracking-widest text-xl neon-cyan">WORLD MAP</h2>
           </div>
-          <div className="mt-2 text-[10px] uppercase tracking-widest text-muted-foreground">
-            Android • Free Download
-          </div>
-          <div className="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">
-            <CheckCircle2 className="size-3.5 text-primary" />
-            No account needed for the first mission
-          </div>
-        </div>
-      </section>
-
-      {/* Pillars */}
-      <section className="mx-auto max-w-7xl px-4 -mt-8 pb-4">
-        <div className="grid sm:grid-cols-3 gap-3">
-          <Pillar Icon={Zap} title="Play, don't watch" body="Every concept is a puzzle, simulation, or boss fight." accent="cyan" />
-          <Pillar Icon={Bot} title="Personal AI mentor" body="Cipher tracks your progress, hints, explains errors." accent="purple" />
-          <Pillar Icon={Trophy} title="Earn XP & badges" body="Level up across 8 worlds — from logic to job-ready." accent="gold" />
-        </div>
-      </section>
-
-      {/* Worlds */}
-      <section className="mx-auto max-w-7xl px-4 py-12">
-        <div className="flex items-center gap-3 mb-6">
-          <Compass className="size-5 text-primary" />
-          <h2 className="font-display tracking-widest text-xl neon-cyan">WORLD MAP</h2>
+          {userId && (
+            <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
+              Progress saved to your account
+            </span>
+          )}
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -185,38 +186,6 @@ function WorldMap() {
           })}
         </div>
       </section>
-
-      <footer className="border-t border-border mt-8">
-        <div className="mx-auto max-w-7xl px-4 py-6 text-xs text-muted-foreground flex items-center justify-between">
-          <span>© Code Quest · Learn by playing</span>
-          <span className="font-display tracking-widest neon-cyan">v1.0 · MVP</span>
-        </div>
-      </footer>
-    </div>
-  );
-}
-
-function Pillar({
-  Icon,
-  title,
-  body,
-  accent,
-}: {
-  Icon: typeof Zap;
-  title: string;
-  body: string;
-  accent: "cyan" | "purple" | "gold";
-}) {
-  const colorClass = accent === "cyan" ? "text-primary" : accent === "purple" ? "text-secondary" : "text-accent";
-  return (
-    <div className="panel p-4 flex items-start gap-3">
-      <div className="size-9 rounded-md bg-surface-2 grid place-items-center border border-border">
-        <Icon className={`size-4 ${colorClass}`} />
-      </div>
-      <div>
-        <div className={`font-display text-sm tracking-widest ${colorClass}`}>{title.toUpperCase()}</div>
-        <p className="text-xs text-muted-foreground mt-0.5">{body}</p>
-      </div>
     </div>
   );
 }
