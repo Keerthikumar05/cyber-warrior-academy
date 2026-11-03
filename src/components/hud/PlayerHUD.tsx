@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useRouter } from "@tanstack/react-router";
+import { Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { Zap, Coins, Star, LogOut, Sparkles, User as UserIcon, Trophy, Swords, Target, MessageSquare, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { readGuest, levelFromXp, type GuestProgress } from "@/lib/progress";
