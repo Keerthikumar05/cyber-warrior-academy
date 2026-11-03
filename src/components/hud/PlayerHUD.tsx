@@ -88,9 +88,12 @@ export function PlayerHUD() {
   const prevLevelXp = (level - 1) * 100;
   const pct = Math.min(100, Math.max(0, ((xp - prevLevelXp) / (nextLevelXp - prevLevelXp)) * 100));
 
+  const navigate = useNavigate();
+
   async function signOut() {
     await supabase.auth.signOut();
     router.invalidate();
+    navigate({ to: "/auth", replace: true });
   }
 
   return (
