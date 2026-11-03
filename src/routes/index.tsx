@@ -152,32 +152,28 @@ function WorldMap() {
                     </div>
                     <div className="mt-3 flex items-center justify-between text-xs">
                       <span className="text-muted-foreground">{cleared}/{total} missions</span>
-                      <span
-                        className="text-primary hover:text-primary-glow inline-flex items-center gap-1 cursor-pointer"
-                        onClick={() => {
-                          window.location.assign(
-                            `/play/${w.slug}/${missions[Math.min(cleared, total - 1)].slug}`,
-                          );
-                        }}
+                      <Link
+                        to="/play/$world/$mission"
+                        params={{ world: w.slug, mission: missions[Math.min(cleared, total - 1)].slug }}
+                        className="text-primary hover:text-primary-glow inline-flex items-center gap-1"
                       >
                         {cleared === 0 ? "Start" : cleared === total ? "Replay" : "Continue"} <ArrowRight className="size-3" />
-                      </span>
+                      </Link>
                     </div>
                     <div className="mt-3 space-y-1">
                       {missions.map((m, i) => {
                         const done = completedSet.has(`${w.slug}/${m.slug}`);
                         return (
-                          <div
+                          <Link
                             key={m.slug}
-                            onClick={() => {
-                              window.location.assign(`/play/${w.slug}/${m.slug}`);
-                            }}
-                            className="flex items-center gap-2 text-xs rounded px-2 py-1 hover:bg-surface-2 cursor-pointer"
+                            to="/play/$world/$mission"
+                            params={{ world: w.slug, mission: m.slug }}
+                            className="flex items-center gap-2 text-xs rounded px-2 py-1 hover:bg-surface-2"
                           >
                             <span className={`size-1.5 rounded-full ${done ? "bg-accent" : "bg-muted-foreground/40"}`} />
                             <span className="font-mono text-muted-foreground">{String(i + 1).padStart(2, "0")}</span>
                             <span className={done ? "neon-gold" : "text-foreground/80"}>{m.title}</span>
-                          </div>
+                          </Link>
                         );
                       })}
                     </div>
