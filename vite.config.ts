@@ -13,6 +13,12 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // The Lovable config sets a cloudflare `defaultPreset`, which would win over
+  // Vercel's auto-detection and leave the Vercel deployment without a server
+  // (it then serves the repo root statically). When building on Vercel
+  // (VERCEL=1 is set there), pin the Vercel preset so the build emits the
+  // `.vercel/output` Build Output API v3 with the SSR function.
+  ...(process.env.VERCEL ? { nitro: { preset: "vercel" } } : {}),
   vite: {
     plugins: [
       VitePWA({
